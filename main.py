@@ -7,21 +7,29 @@ testLink = [224,238,'http://www.chennailocaltrain.com/beach-to-chengalpattu-trai
 testLink1 = [224,238,'http://www.chennailocaltrain.com/beach-to-chengalpattu-train-timings-1.html']
 testLink2 = [144,157,'http://www.chennailocaltrain.com/tambaram-to-beach-train-timings-1.html']
 def get(siz):
-    root = requests.get(siz[2]).text
-    soup = BeautifulSoup(root, 'lxml')
-    data = soup.find_all('table')
+    j = 1
     Datadf = pd.DataFrame([])
-    for i,d in enumerate(data):
-        dataLst = []
-        val = str(d.text)
-        val = val.replace(' ', '')
-        val = val.split()
-        print(len(val))
-        if len(val) > siz[1]:
-            buf = []
-            run = []
-            
-            if True:
+    while True:
+        flag = [False]
+        try:
+            link = siz[2][:-6]+str(j)+siz[2][-5:]
+            print(link)
+            root = requests.get(link).text
+        except:
+            break
+        soup = BeautifulSoup(root, 'lxml')
+        data = soup.find_all('table')
+        for i,d in enumerate(data):
+            dataLst = []
+            val = str(d.text)
+            val = val.replace(' ', '')
+            val = val.split()
+            #print(len(val))
+            if len(val) > siz[1]:
+                flag.clear()
+                flag.append(True)
+                buf = []
+                run = []
                 run.append(val[-siz[0]-6:-siz[0]])
                 buf.append(val[-siz[0]:])
                 val = buf[0]
@@ -33,7 +41,8 @@ def get(siz):
                 df = pd.concat([pd.DataFrame(run, columns=list(range(1,7))), df])
                 #print(df)
                 Datadf = pd.concat([Datadf, df], axis=1)
+        if not flag[0]:
+            break
+        j+=1
     return Datadf
-get(testLink2).to_csv('assets\\test.csv')
-
-        
+print(get(testLink))
