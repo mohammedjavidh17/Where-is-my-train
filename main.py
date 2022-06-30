@@ -3,10 +3,13 @@ import requests
 import numpy as np
 import pandas as pd
 
+assets = ['assets\\ajj-mas.csv', 'assets\cgl-msb.csv', 'assets\mas-tpty.csv', 'assets\msb-trt.csv','assets\\tmb-msb.csv', 
+'assets\\tmpl-msb.csv', 'assets\\trt-msb.csv', 'assets\\vlcy-ms.csv'
+]
 testLink = [224,238,'http://www.chennailocaltrain.com/beach-to-chengalpattu-train-timings-1.html']
 testLink1 = [224,238,'http://www.chennailocaltrain.com/beach-to-chengalpattu-train-timings-1.html']
 testLink2 = [144,157,'http://www.chennailocaltrain.com/tambaram-to-beach-train-timings-1.html']
-def get(siz):
+def getData(siz:list):
     j = 1
     Datadf = pd.DataFrame([])
     while True:
@@ -45,4 +48,17 @@ def get(siz):
             break
         j+=1
     return Datadf
-print(get(testLink))
+
+def getAsset(Dta:list):
+    toRet = []
+    for i,loc in enumerate(assets):
+        df = pd.read_csv(loc)
+        dta = list(df.iloc[:, 0])
+        if Dta[0] in dta and Dta[1] in dta:
+            buf = []
+            buf.append(loc)
+            a = dta.index(Dta[1])-dta.index(Dta[0])
+            buf.append(a)
+            toRet.append(buf)
+    return toRet
+print(getAsset(['VELACHERY', 'LIGHT HOUSE']))
