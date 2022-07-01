@@ -5,12 +5,13 @@ from tkinter import *
 from ttkwidgets.autocomplete import *
 import pyautogui as pyg
 import pandas as pd
+import time
 pyg
 
 cf = pd.read_json('assets\\config.json').iloc[0,0]
 stations = []
 assets = [ 'assets\cgl-msb.csv', 'assets\\tmb-msb.csv', 'assets\\ajj-mas.csv', 'assets\mas-tpty.csv', 'assets\msb-trt.csv', 
-'assets\\tmpl-msb.csv', 'assets\\trt-msb.csv', 'assets\\vlcy-ms.csv'
+'assets\\tmpl-msb.csv', 'assets\\vlcy-ms.csv'
 ]
 for sta in assets:
     df = pd.read_csv(sta)
@@ -18,15 +19,17 @@ for sta in assets:
     for x in buf:
         stations.append(x)
 
-
 testLink1 = [224,238,'http://www.chennailocaltrain.com/chengalpattu-to-beach-train-timings-1.html', 'assets\cgl-msb']
 testLink2 = [144,157,'http://www.chennailocaltrain.com/tambaram-to-beach-train-timings-1.html', 'assets\\tmb-msb']
 testLink3 = [232,245,'http://www.chennailocaltrain.com/arakkonam-to-Chennai-central-train-timings-1.html', 'assets\\ajj-mas.csv']
 testLink4 = [320, 333, 'http://www.chennailocaltrain.com/chennai-to-tirupati-train-timings.html', 'assets\mas-tpty.csv']
+testLink5 = [248, 260, 'http://www.chennailocaltrain.com/beach-to-tiruttani-train-timings.html', 'assets\msb-trt.csv']
+testLink6 = [296, 300,'http://www.chennailocaltrain.com/tirumalpur-to-beach-train-timings.html' ,'assets\\tmpl-msb.csv']
+testLink7 = [144, 150, 'http://www.chennailocaltrain.com/velachery-to-beach-train-timings-1.html', 'assets\\vlcy-ms.csv']
 
 linkData = pd.read_csv('assets\linkData.csv')
 
-def getData(siz:list):
+def getData(siz:list, grp = 8):
     j = 1
     Datadf = pd.DataFrame([])
     while True:
@@ -42,15 +45,19 @@ def getData(siz:list):
             root = requests.get(link).text
         soup = BeautifulSoup(root, 'lxml')
         data = soup.find_all('table')
-        
+
         for i,d in enumerate(data):
-            
             dataLst = []
             val = str(d.text)
             val = val.replace(' ', '')
             val = val.split()
             
+
             if len(val) > siz[1]:
+                if siz[-1] == 'assets\\tmpl-msb.csv':
+                    if len(val) == 307:
+                        for k in range(4):
+                            val.insert(11, '--')
                 flag.clear()
                 
                 flag.append(True)
@@ -59,12 +66,13 @@ def getData(siz:list):
                 run.append(val[-siz[0]-6:-siz[0]])
                 buf.append(val[-siz[0]:])
                 val = buf[0]
-                for x in range(0, len(val), 8):
+                for x in range(0, len(val), grp):
                     
-                    dataLst.append(val[x:8+x])
+                    dataLst.append(val[x:grp+x])
                 df = pd.DataFrame(dataLst).iloc[:, 1:-1]
-                df = df.replace('--', np.nan)
-                df = pd.concat([pd.DataFrame(run, columns=list(range(1,7))), df])
+                df = df.replace('--', np.nan) #---
+                df = df.replace('---', np.nan)
+                df = pd.concat([pd.DataFrame(run, columns=list(range(1,7))).replace('--', np.nan), df])
                 
                 Datadf = pd.concat([Datadf, df], axis=1)
         if siz[2][-6] != '1':
@@ -86,7 +94,6 @@ def getAsset(Dta:list):
             buf.append(i)
             toRet.append(buf)
     return toRet
-
 
 root = Tk()
 width = root.winfo_screenwidth() - 50
@@ -123,8 +130,10 @@ def reponseWindow(dta:list):
     linkD1 = getAsset(dta)
     print(linkD1)
 
+dg = pd.read_csv('assets\\linkData.csv')
 
-getData(testLink4).to_csv('assets\\test.csv')
-getData(testLink3).to_csv('assets\\test.csv')
-getData(testLink2).to_csv('assets\\test.csv')
-getData(testLink1).to_csv('assets\\test.csv')
+for test in range(4,7):
+    lst = list(dg.iloc[test, :])
+    print(lst)
+    getData(lst).to_csv('assets\\test.csv')
+
