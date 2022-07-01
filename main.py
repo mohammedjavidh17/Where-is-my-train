@@ -8,6 +8,13 @@ import pandas as pd
 import time
 pyg
 
+Root = Tk()
+width = Root.winfo_screenwidth() - 50
+height = Root.winfo_screenheight() - 50
+Root.geometry('%dx%d'%(width, height))
+def load():
+    pass
+
 cf = pd.read_json('assets\\config.json').iloc[0,0]
 stations = []
 assets = [ 'assets\cgl-msb.csv', 'assets\\tmb-msb.csv', 'assets\\ajj-mas.csv', 'assets\mas-tpty.csv', 'assets\msb-trt.csv', 
@@ -18,7 +25,17 @@ for sta in assets:
     buf = list(df.iloc[:, 0])
     for x in buf:
         stations.append(x)
+revLink = {
+    'http://www.chennailocaltrain.com/chengalpattu-to-beach-train-timings-1.html' : 'http://www.chennailocaltrain.com/beach-to-chengalpattu-train-timings-1.html',
+    'http://www.chennailocaltrain.com/tambaram-to-beach-train-timings-1.html' : 'http://www.chennailocaltrain.com/beach-to-tambaram-train-timings-1.html',
+    'http://www.chennailocaltrain.com/arakkonam-to-Chennai-central-train-timings-1.html' : 'http://www.chennailocaltrain.com/chennai-central-to-arakkonam-train-timings-1.html',
+    'http://www.chennailocaltrain.com/chennai-to-tirupati-train-timings.html' : 'http://www.chennailocaltrain.com/tirupati-to-chennai-train-timings.html',
+    'http://www.chennailocaltrain.com/beach-to-tiruttani-train-timings.html' : 'http://www.chennailocaltrain.com/tiruttani-to-chennai-beach-train-timings.html',
+    'http://www.chennailocaltrain.com/tirumalpur-to-beach-train-timings.html' : 'http://www.chennailocaltrain.com/beach-to-tirumalpur-train-timings.html',
+    'http://www.chennailocaltrain.com/velachery-to-beach-train-timings-1.html' : 'http://www.chennailocaltrain.com/beach-to-velachery-train-timings-1.html'
+}
 
+#TestSets
 testLink1 = [224,238,'http://www.chennailocaltrain.com/chengalpattu-to-beach-train-timings-1.html', 'assets\cgl-msb']
 testLink2 = [144,157,'http://www.chennailocaltrain.com/tambaram-to-beach-train-timings-1.html', 'assets\\tmb-msb']
 testLink3 = [232,245,'http://www.chennailocaltrain.com/arakkonam-to-Chennai-central-train-timings-1.html', 'assets\\ajj-mas.csv']
@@ -37,7 +54,9 @@ def getData(siz:list, grp = 8):
         try:
             link = siz[2][:-6]+str(j)+siz[2][-5:]
             print(link)
+            Root.update()
             root = requests.get(link).text
+            Root.update()
         except:
             break
         if siz[2][-6] != '1':
@@ -95,14 +114,11 @@ def getAsset(Dta:list):
             toRet.append(buf)
     return toRet
 
-root = Tk()
-width = root.winfo_screenwidth() - 50
-height = root.winfo_screenheight() - 50
-root.geometry('%dx%d'%(width, height))
+
 
 def clrAll():
     try:
-        for x in root.winfo_children:
+        for x in Root.winfo_children:
             x.destroy()
     except:
         pass
@@ -111,9 +127,9 @@ def mainWindow():
     clrAll()
 
     def AutoFocus():
-        if str(root.focus_get())[13:] == '!autocompletecombobox':
+        if str(Root.focus_get())[13:] == '!autocompletecombobox':
             To.focus_set()
-    frm = LabelFrame(root)
+    frm = LabelFrame(Root)
     frm.place(relx=0.5, rely=0.01, anchor=N, relheight=0.98, relwidth=0.35)
     Label(frm, text="From : ", font=(cf['font'], cf['S2'])).grid(column=0, row=0, padx=20, pady=40)
     Label(frm, text="To : ", font=(cf['font'], cf['S2'])).grid(column=0, row=1, padx=20, pady=40)
@@ -123,17 +139,16 @@ def mainWindow():
     To.grid(column=1, row=1, padx=20, pady=40)
     From.focus_set()
     Button(frm, text='Find Trains', font=(cf['font'], 19), bg='#92d437', command=lambda:reponseWindow([str(From.get()), str(To.get())])).grid(column=0, row=2, columnspan=2, padx=10, pady=60)
-    root.bind('<Return>', lambda e: AutoFocus())
-
+    Root.bind('<Return>', lambda e: AutoFocus())
 def reponseWindow(dta:list):
     print(dta)
     linkD1 = getAsset(dta)
-    print(linkD1)
+    for trn in linkD1:
+        ind = trn[-1]
+        if trn[-2] > 0:
+            siz = list(linkData.iloc[ind, :])
+            getData(siz=siz).to_csv('assets\\test.csv')
 
-dg = pd.read_csv('assets\\linkData.csv')
-
-for test in range(4,7):
-    lst = list(dg.iloc[test, :])
-    print(lst)
-    getData(lst).to_csv('assets\\test.csv')
+mainWindow()
+Root.mainloop()
 
