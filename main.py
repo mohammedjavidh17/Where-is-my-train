@@ -21,6 +21,8 @@ for sta in assets:
 
 testLink1 = [224,238,'http://www.chennailocaltrain.com/chengalpattu-to-beach-train-timings-1.html', 'assets\cgl-msb']
 testLink2 = [144,157,'http://www.chennailocaltrain.com/tambaram-to-beach-train-timings-1.html', 'assets\\tmb-msb']
+testLink3 = [232,245,'http://www.chennailocaltrain.com/arakkonam-to-Chennai-central-train-timings-1.html', 'assets\\ajj-mas.csv']
+testLink4 = [320, 333, 'http://www.chennailocaltrain.com/chennai-to-tirupati-train-timings.html', 'assets\mas-tpty.csv']
 
 linkData = pd.read_csv('assets\linkData.csv')
 
@@ -35,16 +37,22 @@ def getData(siz:list):
             root = requests.get(link).text
         except:
             break
+        if siz[2][-6] != '1':
+            link = siz[2]
+            root = requests.get(link).text
         soup = BeautifulSoup(root, 'lxml')
         data = soup.find_all('table')
+        
         for i,d in enumerate(data):
+            
             dataLst = []
             val = str(d.text)
             val = val.replace(' ', '')
             val = val.split()
-            #print(len(val))
+            
             if len(val) > siz[1]:
                 flag.clear()
+                
                 flag.append(True)
                 buf = []
                 run = []
@@ -57,8 +65,10 @@ def getData(siz:list):
                 df = pd.DataFrame(dataLst).iloc[:, 1:-1]
                 df = df.replace('--', np.nan)
                 df = pd.concat([pd.DataFrame(run, columns=list(range(1,7))), df])
-                #print(df)
+                
                 Datadf = pd.concat([Datadf, df], axis=1)
+        if siz[2][-6] != '1':
+            break
         if not flag[0]:
             break
         j+=1
@@ -110,5 +120,11 @@ def mainWindow():
 
 def reponseWindow(dta:list):
     print(dta)
-mainWindow()
-root.mainloop()
+    linkD1 = getAsset(dta)
+    print(linkD1)
+
+
+getData(testLink4).to_csv('assets\\test.csv')
+getData(testLink3).to_csv('assets\\test.csv')
+getData(testLink2).to_csv('assets\\test.csv')
+getData(testLink1).to_csv('assets\\test.csv')
