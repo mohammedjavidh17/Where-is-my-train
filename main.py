@@ -89,8 +89,10 @@ def clrAll():
             x.destroy()
     except:
         pass
+
 def mainWindow():
     clrAll()
+
     def AutoFocus():
         if str(root.focus_get())[13:] == '!autocompletecombobox':
             To.focus_set()
@@ -103,8 +105,10 @@ def mainWindow():
     To = AutocompleteCombobox(frm, completevalues=stations, width= 30,font=(cf['font'], cf['S2']))
     To.grid(column=1, row=1, padx=20, pady=40)
     From.focus_set()
-    Button(frm, text='Find Trains', font=(cf['font'], 19), bg='#92d437', command=None).grid(column=0, row=2, columnspan=2, padx=10, pady=60)
+    Button(frm, text='Find Trains', font=(cf['font'], 19), bg='#92d437', command=lambda:reponseWindow([str(From.get()), str(To.get())])).grid(column=0, row=2, columnspan=2, padx=10, pady=60)
     root.bind('<Return>', lambda e: AutoFocus())
 
+def reponseWindow(dta:list):
+    print(dta)
 mainWindow()
 root.mainloop()
