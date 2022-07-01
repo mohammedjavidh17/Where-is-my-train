@@ -1,0 +1,11 @@
+{
+    "config":[
+        {
+            "title":"Title",
+            "font":"Consolas",
+            "S1":25,
+            "S2":15,
+            "S3":10
+        }
+    ]
+}
