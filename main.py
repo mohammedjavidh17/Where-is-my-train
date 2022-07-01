@@ -1,14 +1,29 @@
 from bs4 import BeautifulSoup
 import requests
 import numpy as np
+from tkinter import *
+from ttkwidgets.autocomplete import *
+import pyautogui as pyg
 import pandas as pd
+pyg
 
-assets = ['assets\\ajj-mas.csv', 'assets\cgl-msb.csv', 'assets\mas-tpty.csv', 'assets\msb-trt.csv','assets\\tmb-msb.csv', 
+cf = pd.read_json('assets\\config.json').iloc[0,0]
+stations = []
+assets = [ 'assets\cgl-msb.csv', 'assets\\tmb-msb.csv', 'assets\\ajj-mas.csv', 'assets\mas-tpty.csv', 'assets\msb-trt.csv', 
 'assets\\tmpl-msb.csv', 'assets\\trt-msb.csv', 'assets\\vlcy-ms.csv'
 ]
-testLink = [224,238,'http://www.chennailocaltrain.com/beach-to-chengalpattu-train-timings-1.html']
-testLink1 = [224,238,'http://www.chennailocaltrain.com/beach-to-chengalpattu-train-timings-1.html']
-testLink2 = [144,157,'http://www.chennailocaltrain.com/tambaram-to-beach-train-timings-1.html']
+for sta in assets:
+    df = pd.read_csv(sta)
+    buf = list(df.iloc[:, 0])
+    for x in buf:
+        stations.append(x)
+
+
+testLink1 = [224,238,'http://www.chennailocaltrain.com/chengalpattu-to-beach-train-timings-1.html', 'assets\cgl-msb']
+testLink2 = [144,157,'http://www.chennailocaltrain.com/tambaram-to-beach-train-timings-1.html', 'assets\\tmb-msb']
+
+linkData = pd.read_csv('assets\linkData.csv')
+
 def getData(siz:list):
     j = 1
     Datadf = pd.DataFrame([])
@@ -48,7 +63,6 @@ def getData(siz:list):
             break
         j+=1
     return Datadf
-
 def getAsset(Dta:list):
     toRet = []
     for i,loc in enumerate(assets):
@@ -59,6 +73,38 @@ def getAsset(Dta:list):
             buf.append(loc)
             a = dta.index(Dta[1])-dta.index(Dta[0])
             buf.append(a)
+            buf.append(i)
             toRet.append(buf)
     return toRet
-print(getAsset(['VELACHERY', 'LIGHT HOUSE']))
+
+
+root = Tk()
+width = root.winfo_screenwidth() - 50
+height = root.winfo_screenheight() - 50
+root.geometry('%dx%d'%(width, height))
+
+def clrAll():
+    try:
+        for x in root.winfo_children:
+            x.destroy()
+    except:
+        pass
+def mainWindow():
+    clrAll()
+    def AutoFocus():
+        if str(root.focus_get())[13:] == '!autocompletecombobox':
+            To.focus_set()
+    frm = LabelFrame(root)
+    frm.place(relx=0.5, rely=0.01, anchor=N, relheight=0.98, relwidth=0.35)
+    Label(frm, text="From : ", font=(cf['font'], cf['S2'])).grid(column=0, row=0, padx=20, pady=40)
+    Label(frm, text="To : ", font=(cf['font'], cf['S2'])).grid(column=0, row=1, padx=20, pady=40)
+    From = AutocompleteCombobox(frm, completevalues=stations, width= 30, font=(cf['font'], cf['S2']))
+    From.grid(column=1, row=0, padx=20, pady=40)
+    To = AutocompleteCombobox(frm, completevalues=stations, width= 30,font=(cf['font'], cf['S2']))
+    To.grid(column=1, row=1, padx=20, pady=40)
+    From.focus_set()
+    Button(frm, text='Find Trains', font=(cf['font'], 19), bg='#92d437', command=None).grid(column=0, row=2, columnspan=2, padx=10, pady=60)
+    root.bind('<Return>', lambda e: AutoFocus())
+
+mainWindow()
+root.mainloop()
