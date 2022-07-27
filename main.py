@@ -1,11 +1,12 @@
+from tkinter.ttk import Progressbar
 from bs4 import BeautifulSoup
 import requests
 import numpy as np
 from tkinter import *
+from ttkwidgets import *
 from ttkwidgets.autocomplete import *
 import pyautogui as pyg
 import pandas as pd
-import time
 pyg
 
 Root = Tk()
@@ -17,7 +18,7 @@ def load():
 
 cf = pd.read_json('assets\\config.json').iloc[0,0]
 stations = []
-assets = [ 'assets\cgl-msb.csv', 'assets\\tmb-msb.csv', 'assets\\ajj-mas.csv', 'assets\mas-tpty.csv', 'assets\msb-trt.csv', 
+assets = [ 'assets\\cgl-msb.csv', 'assets\\tmb-msb.csv', 'assets\\ajj-mas.csv', 'assets\\mas-tpty.csv', 'assets\\msb-trt.csv', 
 'assets\\tmpl-msb.csv', 'assets\\vlcy-ms.csv'
 ]
 for sta in assets:
@@ -46,22 +47,32 @@ testLink7 = [144, 150, 'http://www.chennailocaltrain.com/velachery-to-beach-trai
 
 linkData = pd.read_csv('assets\linkData.csv')
 
-def getData(siz:list, grp = 8):
+def getData(siz:list, lod, grp = 8):
     j = 1
+    lodVal = 0
     Datadf = pd.DataFrame([])
     while True:
+        if lodVal >= 100:
+            lodVal = 0
         flag = [False]
         try:
             link = siz[2][:-6]+str(j)+siz[2][-5:]
-            print(link)
+            lod['value'] = lodVal
+            lodVal = lodVal+20
             Root.update()
             root = requests.get(link).text
+            print(link, lodVal)
             Root.update()
         except:
             break
         if siz[2][-6] != '1':
             link = siz[2]
+            lod['value'] = lodVal
+            lodVal = lodVal+20
+            Root.update()
             root = requests.get(link).text
+            print(link, lodVal)
+            Root.update()
         soup = BeautifulSoup(root, 'lxml')
         data = soup.find_all('table')
 
@@ -100,7 +111,7 @@ def getData(siz:list, grp = 8):
             break
         j+=1
     return Datadf
-def getAsset(Dta:list):
+def getAsset(Dta:list):    #[from, to]
     toRet = []
     for i,loc in enumerate(assets):
         df = pd.read_csv(loc)
@@ -114,23 +125,23 @@ def getAsset(Dta:list):
             toRet.append(buf)
     return toRet
 
-
-
 def clrAll():
     try:
         for x in Root.winfo_children:
             x.destroy()
     except:
         pass
-
 def mainWindow():
     clrAll()
-
     def AutoFocus():
         if str(Root.focus_get())[13:] == '!autocompletecombobox':
             To.focus_set()
+    global frm
+    global trFrm 
     frm = LabelFrame(Root)
     frm.place(relx=0.5, rely=0.01, anchor=N, relheight=0.98, relwidth=0.35)
+    trFrm = Frame(frm)
+    trFrm.place(relx=0.5, rely=0.45, anchor=N)
     Label(frm, text="From : ", font=(cf['font'], cf['S2'])).grid(column=0, row=0, padx=20, pady=40)
     Label(frm, text="To : ", font=(cf['font'], cf['S2'])).grid(column=0, row=1, padx=20, pady=40)
     From = AutocompleteCombobox(frm, completevalues=stations, width= 30, font=(cf['font'], cf['S2']))
@@ -140,15 +151,41 @@ def mainWindow():
     From.focus_set()
     Button(frm, text='Find Trains', font=(cf['font'], 19), bg='#92d437', command=lambda:reponseWindow([str(From.get()), str(To.get())])).grid(column=0, row=2, columnspan=2, padx=10, pady=60)
     Root.bind('<Return>', lambda e: AutoFocus())
-def reponseWindow(dta:list):
-    print(dta)
-    linkD1 = getAsset(dta)
-    for trn in linkD1:
-        ind = trn[-1]
-        if trn[-2] > 0:
-            siz = list(linkData.iloc[ind, :])
-            getData(siz=siz).to_csv('assets\\test.csv')
 
+def reponseWindow(dta:list):
+    def Disp():
+        pass
+    for wid in trFrm.winfo_children():
+        wid.destroy()
+    linkD1 = getAsset(dta)
+    print(linkD1)
+    Var = IntVar()
+    Var.set(0)
+    Label(trFrm, text="Available Trains", font=(cf['font'], 19)).pack()
+        
+    Load = Progressbar(trFrm, length=100, mode='indeterminate', orient=HORIZONTAL)
+    Load.pack()
+    for trn in linkD1:
+        Root.update_idletasks()
+        ind = trn[-1]
+        siz = list(linkData.iloc[ind, :])
+        if trn[-2] > 0:
+            getData(siz=siz, lod=Load).to_csv('assets\\test.csv')
+        else:
+            lnk = revLink[siz[-2]]
+            Nsiz = [siz[0], siz[1], lnk, siz[-1]]
+            getData(siz=siz, lod=Load).to_csv('assets\\test.csv')
+    Load.destroy()
+    for i,train in enumerate(linkD1):
+        if train[-2] > 0:
+            td = str(pd.read_csv(train[0]).iloc[0, 0]) +' - '+str(pd.read_csv(train[0]).iloc[-1, 0])
+        else:
+            td = str(pd.read_csv(train[0]).iloc[-1, 0]) +' - '+ str(pd.read_csv(train[0]).iloc[0, 0])
+        Label(trFrm, text=train[0][-11:-4], font=(cf['font'], cf['S2'])).pack(pady=10, padx=10)
+        Root.update()
+    Button(trFrm, text="Search Train", font=(cf['font'], cf['S2']), command=lambda : Disp()).pack(pady=15)
+            
 mainWindow()
 Root.mainloop()
+
 
