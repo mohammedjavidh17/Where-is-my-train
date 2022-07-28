@@ -153,8 +153,12 @@ def mainWindow():
     Root.bind('<Return>', lambda e: AutoFocus())
 
 def reponseWindow(dta:list):
+    usedBuf = 1
     def Disp():
-        pass
+        clrAll()
+        print(linkD1, usedBuf)
+        
+        
     for wid in trFrm.winfo_children():
         wid.destroy()
     linkD1 = getAsset(dta)
@@ -170,11 +174,13 @@ def reponseWindow(dta:list):
         ind = trn[-1]
         siz = list(linkData.iloc[ind, :])
         if trn[-2] > 0:
-            getData(siz=siz, lod=Load).to_csv('assets\\test.csv')
+            getData(siz=siz, lod=Load).to_csv('buff\\'+str(usedBuf)+'.csv')
+            usedBuf = usedBuf+1
         else:
             lnk = revLink[siz[-2]]
             Nsiz = [siz[0], siz[1], lnk, siz[-1]]
-            getData(siz=siz, lod=Load).to_csv('assets\\test.csv')
+            getData(siz=siz, lod=Load).to_csv('buff\\'+str(usedBuf)+'.csv')
+            usedBuf = usedBuf+1
     Load.destroy()
     for i,train in enumerate(linkD1):
         if train[-2] > 0:
@@ -183,9 +189,8 @@ def reponseWindow(dta:list):
             td = str(pd.read_csv(train[0]).iloc[-1, 0]) +' - '+ str(pd.read_csv(train[0]).iloc[0, 0])
         Label(trFrm, text=train[0][-11:-4], font=(cf['font'], cf['S2'])).pack(pady=10, padx=10)
         Root.update()
-    Button(trFrm, text="Search Train", font=(cf['font'], cf['S2']), command=lambda : Disp()).pack(pady=15)
+    Button(trFrm, text="Get Timing", font=(cf['font'], cf['S2']), command=lambda : Disp(linkD1)).pack(pady=15)
             
 mainWindow()
 Root.mainloop()
-
 
