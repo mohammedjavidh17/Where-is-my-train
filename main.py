@@ -10,7 +10,7 @@ import pandas as pd
 pyg
 
 Root = Tk()
-width = Root.winfo_screenwidth() - 50
+width = Root.winfo_screenwidth() - 1000
 height = Root.winfo_screenheight() - 50
 Root.geometry('%dx%d'%(width, height))
 def load():
@@ -139,7 +139,7 @@ def mainWindow():
     global frm
     global trFrm 
     frm = LabelFrame(Root)
-    frm.place(relx=0.5, rely=0.01, anchor=N, relheight=0.98, relwidth=0.35)
+    frm.place(relx=0.5, rely=0.01, anchor=N, relheight=0.98, relwidth=0.75)
     trFrm = Frame(frm)
     trFrm.place(relx=0.5, rely=0.45, anchor=N)
     Label(frm, text="From : ", font=(cf['font'], cf['S2'])).grid(column=0, row=0, padx=20, pady=40)
@@ -154,11 +154,43 @@ def mainWindow():
 
 def reponseWindow(dta:list):
     usedBuf = 1
-    def Disp():
-        clrAll()
-        print(linkD1, usedBuf)
-        
-        
+    def Disp(Data):
+        sel = IntVar()
+        sel.set(-1)
+        def onClick():
+            print(sel.get())
+        for wig in Root.winfo_children():
+            wig.destroy()
+        Frms = []
+        print(Data, usedBuf)
+        for x in range(1, usedBuf):
+            df = pd.read_csv('buff\\'+str(x)+'.csv')
+            for y in range(df.shape[1]):
+                if y%10 == 0:
+                    frm1 = Frame(Root)
+                    frm1.place(relx=0.5, rely=0.5, relheight=0.98, relwidth=0.98, anchor=CENTER)
+                    Frms.append(frm1)
+                    if y==0:
+                        continue
+                D0 = Data[x-1]
+                D1 = pd.read_csv(D0[0])
+                if D0[-2] < 0:
+                    D1 = D1.iloc[::-1]
+                fromInd = None
+                toInd = None
+                for j, k in enumerate(list(D1.iloc[:, 0])):
+                    if str(k) == dta[0]:
+                        fromInd = j
+                    if str(k) == dta[-1]:
+                        toInd = j
+                fromTim = str(df.iloc[fromInd, y])
+                toTim = str(df.iloc[toInd, y])
+                run = str(df.iloc[0, y])
+                toDis = dta[0]+ ' - ' +dta[1]+'  -  '+run+'\n'+fromTim+ ' - ' +toTim
+                Radiobutton(frm1, text=toDis, variable=sel, value=y+(y*x),indicator =0 , font=(cf['font'], 12), command = onClick, padx=10, pady=10).pack(pady=15)
+        Frms[0].tkraise()
+                
+
     for wid in trFrm.winfo_children():
         wid.destroy()
     linkD1 = getAsset(dta)
