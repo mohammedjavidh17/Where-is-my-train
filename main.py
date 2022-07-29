@@ -84,10 +84,16 @@ def getData(siz:list, lod, grp = 8):
             
 
             if len(val) > siz[1]:
+                print(siz)
                 if siz[-1] == 'assets\\tmpl-msb.csv':
                     if len(val) == 307:
                         for k in range(4):
                             val.insert(11, '--')
+                if siz[-2] == 'http://www.chennailocaltrain.com/beach-to-tirumalpur-train-timings.html':
+                    if len(val) == 310:
+                        siz[0] = 295
+                    else:
+                        siz[0] = 296
                 flag.clear()
                 
                 flag.append(True)
@@ -99,6 +105,7 @@ def getData(siz:list, lod, grp = 8):
                 for x in range(0, len(val), grp):
                     
                     dataLst.append(val[x:grp+x])
+                print(pd.DataFrame(dataLst))
                 df = pd.DataFrame(dataLst).iloc[:, 1:-1]
                 df = df.replace('--', np.nan) #---
                 df = df.replace('---', np.nan)
@@ -155,20 +162,46 @@ def mainWindow():
 def reponseWindow(dta:list):
     usedBuf = 1
     def Disp(Data):
+        Frms = []
+        pg = [0]
+        def inc(e=None):
+            a = pg[0]+1
+            pg.clear()
+            pg.append(a)
+            try:
+                Frms[a].tkraise()
+            except:
+                Frms[0].tkraise()
+                pg.clear()
+                pg.append(0)
+        def dec(e=None):
+            a = pg[0]-1
+            pg.clear()
+            pg.append(a)
+            try:
+                Frms[a].tkraise()
+            except:
+                Frms[-1].tkraise()
+                pg.clear()
+                pg.append(len(Frms)-1)
         sel = IntVar()
         sel.set(-1)
         def onClick():
             print(sel.get())
         for wig in Root.winfo_children():
             wig.destroy()
-        Frms = []
         print(Data, usedBuf)
         for x in range(1, usedBuf):
             df = pd.read_csv('buff\\'+str(x)+'.csv')
+            print('buff\\'+str(x)+'.csv')
             for y in range(df.shape[1]):
-                if y%10 == 0:
+                if y%9 == 0:
                     frm1 = Frame(Root)
                     frm1.place(relx=0.5, rely=0.5, relheight=0.98, relwidth=0.98, anchor=CENTER)
+                    PgN = len(Frms)
+                    Label(frm1, text='Pg - '+str(PgN), font=(cf['font'], 12)).place(relx=0.05, rely=0.05, anchor=NW)
+                    Button(frm1, text='<-', font=(cf['font'], 12),padx=5, pady=5, command=dec).place(relx=0.025, rely=0.1)
+                    Button(frm1, text='->', font=(cf['font'], 12),padx=5, pady=5, command=inc).place(relx=0.1, rely=0.1)
                     Frms.append(frm1)
                     if y==0:
                         continue
@@ -180,14 +213,18 @@ def reponseWindow(dta:list):
                 toInd = None
                 for j, k in enumerate(list(D1.iloc[:, 0])):
                     if str(k) == dta[0]:
-                        fromInd = j
+                        fromInd = j+1
                     if str(k) == dta[-1]:
-                        toInd = j
+                        toInd = j+1
                 fromTim = str(df.iloc[fromInd, y])
                 toTim = str(df.iloc[toInd, y])
                 run = str(df.iloc[0, y])
+                if fromTim == 'nan' or toTim == 'nan':
+                    continue
                 toDis = dta[0]+ ' - ' +dta[1]+'  -  '+run+'\n'+fromTim+ ' - ' +toTim
                 Radiobutton(frm1, text=toDis, variable=sel, value=y+(y*x),indicator =0 , font=(cf['font'], 12), command = onClick, padx=10, pady=10).pack(pady=15)
+        Root.bind('<Right>', inc)
+        Root.bind('<Left>', dec)
         Frms[0].tkraise()
                 
 
@@ -211,7 +248,7 @@ def reponseWindow(dta:list):
         else:
             lnk = revLink[siz[-2]]
             Nsiz = [siz[0], siz[1], lnk, siz[-1]]
-            getData(siz=siz, lod=Load).to_csv('buff\\'+str(usedBuf)+'.csv')
+            getData(siz=Nsiz, lod=Load).to_csv('buff\\'+str(usedBuf)+'.csv')
             usedBuf = usedBuf+1
     Load.destroy()
     for i,train in enumerate(linkD1):
@@ -225,4 +262,6 @@ def reponseWindow(dta:list):
             
 mainWindow()
 Root.mainloop()
+
+
 
