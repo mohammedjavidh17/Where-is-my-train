@@ -84,16 +84,15 @@ def getData(siz:list, lod, grp = 8):
             
 
             if len(val) > siz[1]:
-                print(siz)
+                
                 if siz[-1] == 'assets\\tmpl-msb.csv':
                     if len(val) == 307:
                         for k in range(4):
                             val.insert(11, '--')
                 if siz[-2] == 'http://www.chennailocaltrain.com/beach-to-tirumalpur-train-timings.html':
                     if len(val) == 310:
-                        siz[0] = 295
-                    else:
-                        siz[0] = 296
+                        val.insert(-27, '--')
+                        
                 flag.clear()
                 
                 flag.append(True)
@@ -105,7 +104,7 @@ def getData(siz:list, lod, grp = 8):
                 for x in range(0, len(val), grp):
                     
                     dataLst.append(val[x:grp+x])
-                print(pd.DataFrame(dataLst))
+                
                 df = pd.DataFrame(dataLst).iloc[:, 1:-1]
                 df = df.replace('--', np.nan) #---
                 df = df.replace('---', np.nan)
@@ -156,10 +155,13 @@ def mainWindow():
     To = AutocompleteCombobox(frm, completevalues=stations, width= 30,font=(cf['font'], cf['S2']))
     To.grid(column=1, row=1, padx=20, pady=40)
     From.focus_set()
-    Button(frm, text='Find Trains', font=(cf['font'], 19), bg='#92d437', command=lambda:reponseWindow([str(From.get()), str(To.get())])).grid(column=0, row=2, columnspan=2, padx=10, pady=60)
+    global find
+    find = Button(frm, text='Find Trains', font=(cf['font'], 19), bg='#92d437', command=lambda:reponseWindow([str(From.get()), str(To.get())]))
+    find.grid(column=0, row=2, columnspan=2, padx=10, pady=60)
     Root.bind('<Return>', lambda e: AutoFocus())
 
 def reponseWindow(dta:list):
+    find['state'] = DISABLED
     usedBuf = 1
     def Disp(Data):
         Frms = []
@@ -190,10 +192,10 @@ def reponseWindow(dta:list):
             print(sel.get())
         for wig in Root.winfo_children():
             wig.destroy()
-        print(Data, usedBuf)
+
+        valueCnt = 0
         for x in range(1, usedBuf):
             df = pd.read_csv('buff\\'+str(x)+'.csv')
-            print('buff\\'+str(x)+'.csv')
             for y in range(df.shape[1]):
                 if y%9 == 0:
                     frm1 = Frame(Root)
@@ -222,7 +224,8 @@ def reponseWindow(dta:list):
                 if fromTim == 'nan' or toTim == 'nan':
                     continue
                 toDis = dta[0]+ ' - ' +dta[1]+'  -  '+run+'\n'+fromTim+ ' - ' +toTim
-                Radiobutton(frm1, text=toDis, variable=sel, value=y+(y*x),indicator =0 , font=(cf['font'], 12), command = onClick, padx=10, pady=10).pack(pady=15)
+                Radiobutton(frm1, text=toDis, variable=sel, value=valueCnt,indicator =0 , font=(cf['font'], 12), command = onClick, padx=10, pady=10).pack(pady=15)
+                valueCnt = valueCnt+1
         Root.bind('<Right>', inc)
         Root.bind('<Left>', dec)
         Frms[0].tkraise()
@@ -231,7 +234,7 @@ def reponseWindow(dta:list):
     for wid in trFrm.winfo_children():
         wid.destroy()
     linkD1 = getAsset(dta)
-    print(linkD1)
+
     Var = IntVar()
     Var.set(0)
     Label(trFrm, text="Available Trains", font=(cf['font'], 19)).pack()
@@ -256,12 +259,12 @@ def reponseWindow(dta:list):
             td = str(pd.read_csv(train[0]).iloc[0, 0]) +' - '+str(pd.read_csv(train[0]).iloc[-1, 0])
         else:
             td = str(pd.read_csv(train[0]).iloc[-1, 0]) +' - '+ str(pd.read_csv(train[0]).iloc[0, 0])
-        Label(trFrm, text=train[0][-11:-4], font=(cf['font'], cf['S2'])).pack(pady=10, padx=10)
+        Label(trFrm, text=td, font=(cf['font'], cf['S2'])).pack(pady=10, padx=10)
         Root.update()
     Button(trFrm, text="Get Timing", font=(cf['font'], cf['S2']), command=lambda : Disp(linkD1)).pack(pady=15)
+    find['state'] = NORMAL
             
 mainWindow()
 Root.mainloop()
-
 
 
