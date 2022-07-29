@@ -104,7 +104,7 @@ def getData(siz:list, lod, grp = 8):
                 for x in range(0, len(val), grp):
                     
                     dataLst.append(val[x:grp+x])
-                
+                print(pd.DataFrame(dataLst))
                 df = pd.DataFrame(dataLst).iloc[:, 1:-1]
                 df = df.replace('--', np.nan) #---
                 df = df.replace('---', np.nan)
@@ -192,10 +192,11 @@ def reponseWindow(dta:list):
             print(sel.get())
         for wig in Root.winfo_children():
             wig.destroy()
-
+        print(Data, usedBuf)
         valueCnt = 0
         for x in range(1, usedBuf):
             df = pd.read_csv('buff\\'+str(x)+'.csv')
+            print('buff\\'+str(x)+'.csv')
             for y in range(df.shape[1]):
                 if y%9 == 0:
                     frm1 = Frame(Root)
@@ -230,15 +231,13 @@ def reponseWindow(dta:list):
         Root.bind('<Left>', dec)
         Frms[0].tkraise()
                 
-
     for wid in trFrm.winfo_children():
         wid.destroy()
     linkD1 = getAsset(dta)
-
+    print(linkD1)
     Var = IntVar()
     Var.set(0)
     Label(trFrm, text="Available Trains", font=(cf['font'], 19)).pack()
-        
     Load = Progressbar(trFrm, length=100, mode='indeterminate', orient=HORIZONTAL)
     Load.pack()
     for trn in linkD1:
@@ -252,7 +251,7 @@ def reponseWindow(dta:list):
             lnk = revLink[siz[-2]]
             Nsiz = [siz[0], siz[1], lnk, siz[-1]]
             getData(siz=Nsiz, lod=Load).to_csv('buff\\'+str(usedBuf)+'.csv')
-            usedBuf = usedBuf+1
+            usedBuf = usedBuf+1 
     Load.destroy()
     for i,train in enumerate(linkD1):
         if train[-2] > 0:
@@ -266,5 +265,4 @@ def reponseWindow(dta:list):
             
 mainWindow()
 Root.mainloop()
-
 
