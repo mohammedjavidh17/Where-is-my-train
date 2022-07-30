@@ -1,0 +1,8 @@
+s1, s2, link, location
+224,238,http://www.chennailocaltrain.com/chengalpattu-to-beach-train-timings-1.html,assets\cgl-msb.csv
+144,157,http://www.chennailocaltrain.com/tambaram-to-beach-train-timings-1.html,assets\tmb-msb.csv
+232,245,http://www.chennailocaltrain.com/arakkonam-to-Chennai-central-train-timings-1.html,assets\ajj-mas.csv
+320,333,http://www.chennailocaltrain.com/chennai-to-tirupati-train-timings.html,assets\mas-tpty.csv
+248,260,http://www.chennailocaltrain.com/beach-to-tiruttani-train-timings.html,assets\msb-trt.csv
+296,300,http://www.chennailocaltrain.com/tirumalpur-to-beach-train-timings.html,assets\tmpl-msb.csv
+144,150,http://www.chennailocaltrain.com/velachery-to-beach-train-timings-1.html,assets\vlcy-ms.csv
