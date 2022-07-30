@@ -158,6 +158,7 @@ def mainWindow():
 def reponseWindow(dta:list):
     find['state'] = DISABLED
     usedBuf = 1
+    DisDta = []
     def Disp(Data):
         Frms = []
         pg = [0]
@@ -187,7 +188,8 @@ def reponseWindow(dta:list):
             print(dta)
         def onClick():
             ind = sel.get()
-            for x in range(1, usedBuf+1):
+            print(usedBuf)
+            for x in range(1, usedBuf):
                 df = pd.read_csv('buff\\'+str(x)+'.csv')
                 print(df.shape[1])
                 if x == 1:
@@ -196,14 +198,14 @@ def reponseWindow(dta:list):
                         break
                 elif x == 2:
                     df0 = pd.read_csv('buff\\'+str(1)+'.csv')
-                    ind = ind - df0.shape[1]
+                    ind = ind - df0.shape[1] +1 
                     if ind < df.shape[1]-1:
                         routDis(['buff\\'+str(x)+'.csv', ind])
                         break
                 elif x == 3:
                     df0 = pd.read_csv('buff\\'+str(1)+'.csv')
                     df1 = pd.read_csv('buff\\'+str(2)+'.csv')
-                    ind = ind - df0.shape[1] - df1.shape[0]
+                    ind = ind - df1.shape[1] +1
                     if ind < df.shape[1]-1:
                         routDis(['buff\\'+str(x)+'.csv', ind])
                         break
@@ -220,6 +222,7 @@ def reponseWindow(dta:list):
                     frm1 = Frame(Root)
                     frm1.place(relx=0.5, rely=0.5, relheight=0.98, relwidth=0.98, anchor=CENTER)
                     PgN = len(Frms)
+                    Label(frm1, text=DisDta[x-1], font=(cf['font'], 12)).pack(pady=15)
                     Label(frm1, text='Pg - '+str(PgN), font=(cf['font'], 12)).place(relx=0.05, rely=0.05, anchor=NW)
                     Button(frm1, text='<-', font=(cf['font'], 12),padx=5, pady=5, command=dec).place(relx=0.025, rely=0.1)
                     Button(frm1, text='->', font=(cf['font'], 12),padx=5, pady=5, command=inc).place(relx=0.1, rely=0.1)
@@ -245,6 +248,7 @@ def reponseWindow(dta:list):
                     continue
                 toDis = dta[0]+ ' - ' +dta[1]+'  -  '+run+'\n'+fromTim+ ' - ' +toTim
                 Radiobutton(frm1, text=toDis, variable=sel, value=valueCnt,indicator =0 , font=(cf['font'], 12), command = onClick, padx=10, pady=10).pack(pady=15)
+                    
         Root.bind('<Right>', inc)
         Root.bind('<Left>', dec)
         Frms[0].tkraise()
@@ -269,13 +273,17 @@ def reponseWindow(dta:list):
             lnk = revLink[siz[-2]]
             Nsiz = [siz[0], siz[1], lnk, siz[-1]]
             getData(siz=Nsiz, lod=Load).to_csv('buff\\'+str(usedBuf)+'.csv')
-            usedBuf = usedBuf+1 
+            usedBuf = usedBuf+1
     Load.destroy()
     for i,train in enumerate(linkD1):
         if train[-2] > 0:
-            td = str(pd.read_csv(train[0]).iloc[0, 0]) +' - '+str(pd.read_csv(train[0]).iloc[-1, 0])
+            td = str(pd.read_csv(train[0]).iloc[0, 0]) +' - '+str(pd.read_csv(train[0]).iloc[-1, 0]) 
+            DisDta.append(td)
+            td = td + ' Local EMU'
         else:
-            td = str(pd.read_csv(train[0]).iloc[-1, 0]) +' - '+ str(pd.read_csv(train[0]).iloc[0, 0])
+            td = str(pd.read_csv(train[0]).iloc[-1, 0]) +' - '+ str(pd.read_csv(train[0]).iloc[0, 0]) 
+            DisDta.append(td)
+            td = td + ' Local EMU'
         Label(trFrm, text=td, font=(cf['font'], cf['S2'])).pack(pady=10, padx=10)
         Root.update()
     Button(trFrm, text="Get Timing", font=(cf['font'], cf['S2']), command=lambda : Disp(linkD1)).pack(pady=15)
