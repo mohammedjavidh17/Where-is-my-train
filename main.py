@@ -91,25 +91,20 @@ def getData(siz:list, lod, grp = 8):
                             val.insert(11, '--')
                 if siz[-2] == 'http://www.chennailocaltrain.com/beach-to-tirumalpur-train-timings.html':
                     if len(val) == 310:
-                        val.insert(-27, '--')
-                        
-                flag.clear()
-                
+                        val.insert(-27, '--')        
+                flag.clear()  
                 flag.append(True)
                 buf = []
                 run = []
                 run.append(val[-siz[0]-6:-siz[0]])
                 buf.append(val[-siz[0]:])
                 val = buf[0]
-                for x in range(0, len(val), grp):
-                    
+                for x in range(0, len(val), grp):   
                     dataLst.append(val[x:grp+x])
-                print(pd.DataFrame(dataLst))
                 df = pd.DataFrame(dataLst).iloc[:, 1:-1]
                 df = df.replace('--', np.nan) #---
                 df = df.replace('---', np.nan)
                 df = pd.concat([pd.DataFrame(run, columns=list(range(1,7))).replace('--', np.nan), df])
-                
                 Datadf = pd.concat([Datadf, df], axis=1)
         if siz[2][-6] != '1':
             break
@@ -188,12 +183,35 @@ def reponseWindow(dta:list):
                 pg.append(len(Frms)-1)
         sel = IntVar()
         sel.set(-1)
+        def routDis(dta:list): #[buf, ind]
+            print(dta)
         def onClick():
-            print(sel.get())
+            ind = sel.get()
+            for x in range(1, usedBuf+1):
+                df = pd.read_csv('buff\\'+str(x)+'.csv')
+                print(df.shape[1])
+                if x == 1:
+                    if ind < df.shape[1]-1:
+                        routDis(['buff\\'+str(x)+'.csv', ind])
+                        break
+                elif x == 2:
+                    df0 = pd.read_csv('buff\\'+str(1)+'.csv')
+                    ind = ind - df0.shape[1]
+                    if ind < df.shape[1]-1:
+                        routDis(['buff\\'+str(x)+'.csv', ind])
+                        break
+                elif x == 3:
+                    df0 = pd.read_csv('buff\\'+str(1)+'.csv')
+                    df1 = pd.read_csv('buff\\'+str(2)+'.csv')
+                    ind = ind - df0.shape[1] - df1.shape[0]
+                    if ind < df.shape[1]-1:
+                        routDis(['buff\\'+str(x)+'.csv', ind])
+                        break
+
         for wig in Root.winfo_children():
             wig.destroy()
         print(Data, usedBuf)
-        valueCnt = 0
+        valueCnt = -1
         for x in range(1, usedBuf):
             df = pd.read_csv('buff\\'+str(x)+'.csv')
             print('buff\\'+str(x)+'.csv')
@@ -222,11 +240,11 @@ def reponseWindow(dta:list):
                 fromTim = str(df.iloc[fromInd, y])
                 toTim = str(df.iloc[toInd, y])
                 run = str(df.iloc[0, y])
+                valueCnt = valueCnt+1
                 if fromTim == 'nan' or toTim == 'nan':
                     continue
                 toDis = dta[0]+ ' - ' +dta[1]+'  -  '+run+'\n'+fromTim+ ' - ' +toTim
                 Radiobutton(frm1, text=toDis, variable=sel, value=valueCnt,indicator =0 , font=(cf['font'], 12), command = onClick, padx=10, pady=10).pack(pady=15)
-                valueCnt = valueCnt+1
         Root.bind('<Right>', inc)
         Root.bind('<Left>', dec)
         Frms[0].tkraise()
@@ -265,4 +283,3 @@ def reponseWindow(dta:list):
             
 mainWindow()
 Root.mainloop()
-
