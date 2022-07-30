@@ -9,6 +9,7 @@ import pyautogui as pyg
 import pandas as pd
 pyg
 
+
 Root = Tk()
 width = Root.winfo_screenwidth() - 1000
 height = Root.winfo_screenheight() - 50
