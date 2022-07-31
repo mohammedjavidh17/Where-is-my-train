@@ -9,7 +9,6 @@ import pyautogui as pyg
 import pandas as pd
 pyg
 
-
 Root = Tk()
 width = Root.winfo_screenwidth() - 1000
 height = Root.winfo_screenheight() - 50
@@ -186,7 +185,15 @@ def reponseWindow(dta:list):
         sel = IntVar()
         sel.set(-1)
         def routDis(dta:list): #[buf, ind]
-            print(dta)
+            tk = Tk()
+            width = Root.winfo_screenwidth() - 1500
+            height = Root.winfo_screenheight() - 100
+            tk.geometry('%dx%d'%(width, height))
+            tk.title(DisDta[dta[0]-1])
+            df = pd.read_csv('buff\\'+str(dta[0])+'.csv').iloc[:, dta[1]+1]
+            print(df)
+            tk.mainloop()
+
         def onClick():
             ind = sel.get()
             print(usedBuf)
@@ -195,20 +202,20 @@ def reponseWindow(dta:list):
                 print(df.shape[1])
                 if x == 1:
                     if ind < df.shape[1]-1:
-                        routDis(['buff\\'+str(x)+'.csv', ind])
+                        routDis([x, ind])
                         break
                 elif x == 2:
                     df0 = pd.read_csv('buff\\'+str(1)+'.csv')
-                    ind = ind - df0.shape[1] +1 
+                    ind = ind - df0.shape[1] +1
                     if ind < df.shape[1]-1:
-                        routDis(['buff\\'+str(x)+'.csv', ind])
+                        routDis([x, ind])
                         break
                 elif x == 3:
                     df0 = pd.read_csv('buff\\'+str(1)+'.csv')
                     df1 = pd.read_csv('buff\\'+str(2)+'.csv')
                     ind = ind - df1.shape[1] +1
                     if ind < df.shape[1]-1:
-                        routDis(['buff\\'+str(x)+'.csv', ind])
+                        routDis([x, ind])
                         break
 
         for wig in Root.winfo_children():
@@ -249,15 +256,15 @@ def reponseWindow(dta:list):
                     continue
                 toDis = dta[0]+ ' - ' +dta[1]+'  -  '+run+'\n'+fromTim+ ' - ' +toTim
                 Radiobutton(frm1, text=toDis, variable=sel, value=valueCnt,indicator =0 , font=(cf['font'], 12), command = onClick, padx=10, pady=10).pack(pady=15)
-                    
+
         Root.bind('<Right>', inc)
         Root.bind('<Left>', dec)
         Frms[0].tkraise()
-                
+    
     for wid in trFrm.winfo_children():
         wid.destroy()
     linkD1 = getAsset(dta)
-    print(linkD1)
+    print('linkD1,',linkD1)
     Var = IntVar()
     Var.set(0)
     Label(trFrm, text="Available Trains", font=(cf['font'], 19)).pack()
