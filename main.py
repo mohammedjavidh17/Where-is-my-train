@@ -4,6 +4,7 @@ import requests
 import numpy as np
 from tkinter import *
 from ttkwidgets import *
+from datetime import datetime as dt
 from ttkwidgets.autocomplete import *
 import pyautogui as pyg
 import pandas as pd
@@ -221,6 +222,7 @@ def reponseWindow(dta:list):
                     Apg.clear()
                     Apg.append(0)
             indx =0
+            toR = 0
             flg = False
             for i in range(0, df.shape[0]-8):
                 if flg:
@@ -235,17 +237,32 @@ def reponseWindow(dta:list):
                         BFrm = Frame(AFrm, width=500, height=50)
                         BFrm.pack(pady=10)
                         lb = Label(BFrm, text=df1.iloc[indx,0]+' --> '+df.iloc[indx+1], font=(cf['font'], 15))
-                        lb.place(relx=0.99,rely=0.99 ,anchor=SE)
                         #	u"\U0001F686"
-                        
+                        if True:
+                            tim0 = list(map(int, df.iloc[indx+1].split(':')))
+                            now = dt.now()
+                            try:
+                                tim1 = list(map(int, df.iloc[indx+2].split(':')))
+                            except:
+                                lb['text'] = lb['text'] +' '+ u"\U0001F686"
+                                break
+                            Tim0 = now.replace(hour=tim0[0], minute=tim0[1])
+                            Tim1 = now.replace(hour=tim1[0], minute=tim1[1])
+                            if Tim1 > now and Tim0 < now:
+                                lb['text'] = lb['text'] +' '+ u"\U0001F686"
+                                toR = indx
+                                print(toR)
+                        lb.place(relx=0.99,rely=0.99 ,anchor=SE)
+
                     except:
                         flg = True
                     indx = indx+1
                 Button(AFrm, text='DOWN', font=(cf['font'], 12),padx=5, pady=5, command=inc0).pack(pady=10)
                 Frms1.append(AFrm)
                 indx = indx-7
-
-            Frms1[0].tkraise()
+            Apg.clear()
+            Apg.append(toR)
+            Frms1[toR].tkraise()
             tk.mainloop()
 
         def onClick():
