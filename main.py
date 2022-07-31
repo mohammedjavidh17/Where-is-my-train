@@ -160,6 +160,8 @@ def reponseWindow(dta:list):
     usedBuf = 1
     DisDta = []
     LnkDta = []
+    FrmInd = []
+    ToInd = []
     def Disp(Data):
         Frms = []
         pg = [0]
@@ -194,9 +196,7 @@ def reponseWindow(dta:list):
             tk.geometry('%dx%d'%(width, height))
             tk.title(DisDta[dta[0]-1])
             df = pd.read_csv('buff\\'+str(dta[0])+'.csv').iloc[:, dta[1]+1]
-            print(df)
-            print(LnkDta)
-            print(LnkDta[0][dta[0]-1][0])
+
             df1 = pd.read_csv(LnkDta[0][dta[0]-1][0])
             if LnkDta[0][dta[0]-1][-2] < 0:
                 df1 = df1.iloc[::-1]
@@ -207,16 +207,19 @@ def reponseWindow(dta:list):
                 try:
                     Frms1[a].tkraise()
                 except:
-                    a = Apg[0] - 1
-                    
+                    Apg.clear()
+                    a = len(Frms1)-1
+                    Apg.append(a)
+
             def dec0(e=None):
                 a = Apg[0]-1
                 Apg.clear()
                 Apg.append(a)
-                try:
+                if a >= 0:
                     Frms1[a].tkraise()
-                except:
-                    a = Apg[0] + 1
+                else:
+                    Apg.clear()
+                    Apg.append(0)
             indx =0
             flg = False
             for i in range(0, df.shape[0]-8):
@@ -229,7 +232,12 @@ def reponseWindow(dta:list):
                 for j in range(8):
                     tk.update()
                     try:
-                        Label(AFrm, text=df1.iloc[indx,0], font=(cf['font'], 12)).pack(pady=10)
+                        BFrm = Frame(AFrm, width=500, height=50)
+                        BFrm.pack(pady=10)
+                        lb = Label(BFrm, text=df1.iloc[indx,0]+' --> '+df.iloc[indx+1], font=(cf['font'], 15))
+                        lb.place(relx=0.99,rely=0.99 ,anchor=SE)
+                        #	u"\U0001F686"
+                        
                     except:
                         flg = True
                     indx = indx+1
@@ -257,7 +265,6 @@ def reponseWindow(dta:list):
                         routDis([x, ind])
                         break
                 elif x == 3:
-                    df0 = pd.read_csv('buff\\'+str(1)+'.csv')
                     df1 = pd.read_csv('buff\\'+str(2)+'.csv')
                     ind = ind - df1.shape[1] +1
                     if ind < df.shape[1]-1:
