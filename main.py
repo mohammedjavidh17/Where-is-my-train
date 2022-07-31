@@ -159,6 +159,7 @@ def reponseWindow(dta:list):
     find['state'] = DISABLED
     usedBuf = 1
     DisDta = []
+    LnkDta = []
     def Disp(Data):
         Frms = []
         pg = [0]
@@ -185,13 +186,58 @@ def reponseWindow(dta:list):
         sel = IntVar()
         sel.set(-1)
         def routDis(dta:list): #[buf, ind]
+            Frms1 = []
+            Apg = [0]
             tk = Tk()
-            width = Root.winfo_screenwidth() - 1500
+            width = Root.winfo_screenwidth() - 1200
             height = Root.winfo_screenheight() - 100
             tk.geometry('%dx%d'%(width, height))
             tk.title(DisDta[dta[0]-1])
             df = pd.read_csv('buff\\'+str(dta[0])+'.csv').iloc[:, dta[1]+1]
             print(df)
+            print(LnkDta)
+            print(LnkDta[0][dta[0]-1][0])
+            df1 = pd.read_csv(LnkDta[0][dta[0]-1][0])
+            if LnkDta[0][dta[0]-1][-2] < 0:
+                df1 = df1.iloc[::-1]
+            def inc0(e=None):
+                a = Apg[0]+1
+                Apg.clear()
+                Apg.append(a)
+                try:
+                    Frms1[a].tkraise()
+                except:
+                    a = Apg[0] - 1
+                    
+            def dec0(e=None):
+                a = Apg[0]-1
+                Apg.clear()
+                Apg.append(a)
+                try:
+                    Frms1[a].tkraise()
+                except:
+                    a = Apg[0] + 1
+            indx =0
+            flg = False
+            for i in range(0, df.shape[0]-8):
+                if flg:
+                    break
+                AFrm = Frame(tk)
+                AFrm.place(relx=0.5, rely=0.5, anchor=CENTER, relheight=0.99, relwidth=0.99)
+                Label(AFrm, text='Pg - '+str(i+1), font=(cf['font'], 12)).pack(pady=10)
+                Button(AFrm, text='UP', font=(cf['font'], 12),padx=5, pady=5, command=dec0).pack(pady=10)
+                for j in range(8):
+                    tk.update()
+                    try:
+                        Label(AFrm, text=df1.iloc[indx,0], font=(cf['font'], 12)).pack(pady=10)
+                    except:
+                        flg = True
+                    indx = indx+1
+                Button(AFrm, text='DOWN', font=(cf['font'], 12),padx=5, pady=5, command=inc0).pack(pady=10)
+                Frms1.append(AFrm)
+                indx = indx-7
+
+            Frms1[0].tkraise()
             tk.mainloop()
 
         def onClick():
@@ -264,6 +310,7 @@ def reponseWindow(dta:list):
     for wid in trFrm.winfo_children():
         wid.destroy()
     linkD1 = getAsset(dta)
+    LnkDta.append(linkD1)
     print('linkD1,',linkD1)
     Var = IntVar()
     Var.set(0)
