@@ -12,12 +12,16 @@ import urllib.request
 import pandas as pd
 pyg
 
+icon = 'assets\\icon.ico'
 Root = Tk()
 width = Root.winfo_screenwidth() - 1000
 height = Root.winfo_screenheight() - 50
 Root.geometry('%dx%d'%(width, height))
+Root.iconbitmap(icon)
+
 cf = pd.read_json('assets\\config.json').iloc[0,0]
 stations = []
+Root.title("Where is my Train")
 assets = [ 'assets\\cgl-msb.csv', 'assets\\tmb-msb.csv', 'assets\\ajj-mas.csv', 'assets\\mas-tpty.csv', 'assets\\msb-trt.csv', 
 'assets\\tmpl-msb.csv', 'assets\\vlcy-ms.csv'
 ]
@@ -36,7 +40,6 @@ revLink = {
     'http://www.chennailocaltrain.com/velachery-to-beach-train-timings-1.html' : 'http://www.chennailocaltrain.com/beach-to-velachery-train-timings-1.html'
 }
 
-#TestSets
 testLink1 = [224,238,'http://www.chennailocaltrain.com/chengalpattu-to-beach-train-timings-1.html', 'assets\cgl-msb']
 testLink2 = [144,157,'http://www.chennailocaltrain.com/tambaram-to-beach-train-timings-1.html', 'assets\\tmb-msb']
 testLink3 = [232,245,'http://www.chennailocaltrain.com/arakkonam-to-Chennai-central-train-timings-1.html', 'assets\\ajj-mas.csv']
