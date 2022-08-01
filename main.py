@@ -1,3 +1,4 @@
+from tkinter import messagebox
 from tkinter.ttk import Progressbar
 from bs4 import BeautifulSoup
 import requests
@@ -7,6 +8,7 @@ from ttkwidgets import *
 from datetime import datetime as dt
 from ttkwidgets.autocomplete import *
 import pyautogui as pyg
+import urllib.request
 import pandas as pd
 pyg
 
@@ -14,9 +16,6 @@ Root = Tk()
 width = Root.winfo_screenwidth() - 1000
 height = Root.winfo_screenheight() - 50
 Root.geometry('%dx%d'%(width, height))
-def load():
-    pass
-
 cf = pd.read_json('assets\\config.json').iloc[0,0]
 stations = []
 assets = [ 'assets\\cgl-msb.csv', 'assets\\tmb-msb.csv', 'assets\\ajj-mas.csv', 'assets\\mas-tpty.csv', 'assets\\msb-trt.csv', 
@@ -128,20 +127,36 @@ def getAsset(Dta:list):    #[from, to]
     return toRet
 
 def clrAll():
+    for x in Root.winfo_children():
+        x.destroy()
+def connect(host='http://google.com'):
     try:
-        for x in Root.winfo_children:
-            x.destroy()
+        urllib.request.urlopen(host)
+        return True
     except:
-        pass
+        return False
+def back():
+    clrAll()
+    mainWindow()
+def BackButton(fr):
+    return Button(fr, text="\u274C", font=(cf['font'], 10),bg='#d62929', command=back).place(relx=0.98, rely=0.02, anchor=NE) 
 def mainWindow():
     clrAll()
     def AutoFocus():
         if str(Root.focus_get())[13:] == '!autocompletecombobox':
             To.focus_set()
+    Lbl = Label(Root, text="Checking Connections.. " , font=(cf['font'], 12))
+    Lbl.pack(anchor=CENTER)
+    Root.update()
+    if not connect():
+        messagebox.showerror("Internet not connected", "Check your Internet Connection")
+        Root.destroy()
+    Lbl.destroy()
     global frm
     global trFrm 
     frm = LabelFrame(Root)
     frm.place(relx=0.5, rely=0.01, anchor=N, relheight=0.98, relwidth=0.75)
+    Label(frm, text='Devoloped by Javidh (2022)', font=('Consolas', 12)).place(relx=0.98, rely=0.98, anchor=SE)
     trFrm = Frame(frm)
     trFrm.place(relx=0.5, rely=0.45, anchor=N)
     Label(frm, text="From : ", font=(cf['font'], cf['S2'])).grid(column=0, row=0, padx=20, pady=40)
@@ -155,14 +170,11 @@ def mainWindow():
     find = Button(frm, text='Find Trains', font=(cf['font'], 19), bg='#92d437', command=lambda:reponseWindow([str(From.get()), str(To.get())]))
     find.grid(column=0, row=2, columnspan=2, padx=10, pady=60)
     Root.bind('<Return>', lambda e: AutoFocus())
-
 def reponseWindow(dta:list):
     find['state'] = DISABLED
     usedBuf = 1
     DisDta = []
     LnkDta = []
-    FrmInd = []
-    ToInd = []
     def Disp(Data):
         Frms = []
         pg = [0]
@@ -193,11 +205,11 @@ def reponseWindow(dta:list):
             Apg = [0]
             tk = Tk()
             width = Root.winfo_screenwidth() - 1200
-            height = Root.winfo_screenheight() - 100
+            height = Root.winfo_screenheight() - 200
             tk.geometry('%dx%d'%(width, height))
             tk.title(DisDta[dta[0]-1])
+            Label(tk, text='Devoloped by Javidh (2022)', font=('Consolas', 12)).place(relx=0.98, rely=0.98, anchor=SE)
             df = pd.read_csv('buff\\'+str(dta[0])+'.csv').iloc[:, dta[1]+1]
-
             df1 = pd.read_csv(LnkDta[0][dta[0]-1][0])
             if LnkDta[0][dta[0]-1][-2] < 0:
                 df1 = df1.iloc[::-1]
@@ -211,7 +223,6 @@ def reponseWindow(dta:list):
                     Apg.clear()
                     a = len(Frms1)-1
                     Apg.append(a)
-
             def dec0(e=None):
                 a = Apg[0]-1
                 Apg.clear()
@@ -224,7 +235,7 @@ def reponseWindow(dta:list):
             indx =0
             toR = 0
             flg = False
-            for i in range(0, df.shape[0]-8):
+            for i in range(0, df.shape[0]-8+1):
                 if flg:
                     break
                 AFrm = Frame(tk)
@@ -248,23 +259,24 @@ def reponseWindow(dta:list):
                                 break
                             Tim0 = now.replace(hour=tim0[0], minute=tim0[1])
                             Tim1 = now.replace(hour=tim1[0], minute=tim1[1])
-                            if Tim1 > now and Tim0 < now:
+                            if Tim1 >= now and Tim0 <= now:
                                 lb['text'] = lb['text'] +' '+ u"\U0001F686"
                                 toR = indx
                                 print(toR)
                         lb.place(relx=0.99,rely=0.99 ,anchor=SE)
-
                     except:
                         flg = True
                     indx = indx+1
                 Button(AFrm, text='DOWN', font=(cf['font'], 12),padx=5, pady=5, command=inc0).pack(pady=10)
+                Label(AFrm, text='Devoloped by Javidh (2022)', font=('Consolas', 12)).place(relx=0.98, rely=0.98, anchor=SE)
                 Frms1.append(AFrm)
                 indx = indx-7
             Apg.clear()
             Apg.append(toR)
             Frms1[toR].tkraise()
+            tk.bind('<Down>', inc0)
+            tk.bind('<Up>', dec0)
             tk.mainloop()
-
         def onClick():
             ind = sel.get()
             print(usedBuf)
@@ -287,10 +299,8 @@ def reponseWindow(dta:list):
                     if ind < df.shape[1]-1:
                         routDis([x, ind])
                         break
-
         for wig in Root.winfo_children():
             wig.destroy()
-        print(Data, usedBuf)
         valueCnt = -1
         for x in range(1, usedBuf):
             df = pd.read_csv('buff\\'+str(x)+'.csv')
@@ -304,6 +314,8 @@ def reponseWindow(dta:list):
                     Label(frm1, text='Pg - '+str(PgN), font=(cf['font'], 12)).place(relx=0.05, rely=0.05, anchor=NW)
                     Button(frm1, text='<-', font=(cf['font'], 12),padx=5, pady=5, command=dec).place(relx=0.025, rely=0.1)
                     Button(frm1, text='->', font=(cf['font'], 12),padx=5, pady=5, command=inc).place(relx=0.1, rely=0.1)
+                    BackButton(frm1)
+                    Label(frm1, text='Devoloped by Javidh (2022)', font=('Consolas', 12)).place(relx=0.98, rely=0.98, anchor=SE)
                     Frms.append(frm1)
                     if y==0:
                         continue
@@ -326,11 +338,9 @@ def reponseWindow(dta:list):
                     continue
                 toDis = dta[0]+ ' - ' +dta[1]+'  -  '+run+'\n'+fromTim+ ' - ' +toTim
                 Radiobutton(frm1, text=toDis, variable=sel, value=valueCnt,indicator =0 , font=(cf['font'], 12), command = onClick, padx=10, pady=10).pack(pady=15)
-
         Root.bind('<Right>', inc)
         Root.bind('<Left>', dec)
         Frms[0].tkraise()
-    
     for wid in trFrm.winfo_children():
         wid.destroy()
     linkD1 = getAsset(dta)
@@ -365,8 +375,13 @@ def reponseWindow(dta:list):
             td = td + ' Local EMU'
         Label(trFrm, text=td, font=(cf['font'], cf['S2'])).pack(pady=10, padx=10)
         Root.update()
-    Button(trFrm, text="Get Timing", font=(cf['font'], cf['S2']), command=lambda : Disp(linkD1)).pack(pady=15)
+    btn = Button(trFrm, text="Get Timing", font=(cf['font'], cf['S2']), command=lambda : Disp(linkD1))
+    btn.pack(pady=15)
+    if len(linkD1) == 0:
+        btn['state'] = DISABLED
+    else:
+        btn['state'] = NORMAL
     find['state'] = NORMAL
-            
-mainWindow()
-Root.mainloop()
+ 
+mainWindow() 
+Root.mainloop() 
