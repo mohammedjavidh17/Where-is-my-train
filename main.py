@@ -64,7 +64,6 @@ def getData(siz:list, lod, grp = 8):
             lodVal = lodVal+20
             Root.update()
             root = requests.get(link).text
-            print(link, lodVal)
             Root.update()
         except:
             break
@@ -74,7 +73,6 @@ def getData(siz:list, lod, grp = 8):
             lodVal = lodVal+20
             Root.update()
             root = requests.get(link).text
-            print(link, lodVal)
             Root.update()
         soup = BeautifulSoup(root, 'lxml')
         data = soup.find_all('table')
@@ -211,6 +209,7 @@ def reponseWindow(dta:list):
             height = Root.winfo_screenheight() - 200
             tk.geometry('%dx%d'%(width, height))
             tk.title(DisDta[dta[0]-1])
+            tk.iconbitmap(icon)
             Label(tk, text='Devoloped by Javidh (2022)', font=('Consolas', 12)).place(relx=0.98, rely=0.98, anchor=SE)
             df = pd.read_csv('buff\\'+str(dta[0])+'.csv').iloc[:, dta[1]+1]
             df1 = pd.read_csv(LnkDta[0][dta[0]-1][0])
@@ -238,7 +237,7 @@ def reponseWindow(dta:list):
             indx =0
             toR = 0
             flg = False
-            for i in range(0, df.shape[0]-8+1):
+            for i in range(0, df.shape[0]-8):
                 if flg:
                     break
                 AFrm = Frame(tk)
@@ -251,6 +250,7 @@ def reponseWindow(dta:list):
                         BFrm = Frame(AFrm, width=500, height=50)
                         BFrm.pack(pady=10)
                         lb = Label(BFrm, text=df1.iloc[indx,0]+' --> '+df.iloc[indx+1], font=(cf['font'], 15))
+                        lb.place(relx=0.99,rely=0.99 ,anchor=SE)
                         #	u"\U0001F686"
                         if True:
                             tim0 = list(map(int, df.iloc[indx+1].split(':')))
@@ -258,15 +258,12 @@ def reponseWindow(dta:list):
                             try:
                                 tim1 = list(map(int, df.iloc[indx+2].split(':')))
                             except:
-                                lb['text'] = lb['text'] +' '+ u"\U0001F686"
                                 break
                             Tim0 = now.replace(hour=tim0[0], minute=tim0[1])
                             Tim1 = now.replace(hour=tim1[0], minute=tim1[1])
                             if Tim1 >= now and Tim0 <= now:
                                 lb['text'] = lb['text'] +' '+ u"\U0001F686"
                                 toR = indx
-                                print(toR)
-                        lb.place(relx=0.99,rely=0.99 ,anchor=SE)
                     except:
                         flg = True
                     indx = indx+1
@@ -282,10 +279,8 @@ def reponseWindow(dta:list):
             tk.mainloop()
         def onClick():
             ind = sel.get()
-            print(usedBuf)
             for x in range(1, usedBuf):
                 df = pd.read_csv('buff\\'+str(x)+'.csv')
-                print(df.shape[1])
                 if x == 1:
                     if ind < df.shape[1]-1:
                         routDis([x, ind])
@@ -307,7 +302,6 @@ def reponseWindow(dta:list):
         valueCnt = -1
         for x in range(1, usedBuf):
             df = pd.read_csv('buff\\'+str(x)+'.csv')
-            print('buff\\'+str(x)+'.csv')
             for y in range(df.shape[1]):
                 if y%9 == 0:
                     frm1 = Frame(Root)
@@ -348,7 +342,6 @@ def reponseWindow(dta:list):
         wid.destroy()
     linkD1 = getAsset(dta)
     LnkDta.append(linkD1)
-    print('linkD1,',linkD1)
     Var = IntVar()
     Var.set(0)
     Label(trFrm, text="Available Trains", font=(cf['font'], 19)).pack()
